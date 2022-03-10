@@ -33,9 +33,14 @@ module "vpc" {
 
   public_subnet_tags = {
     Name = "public"
-    Name = "public-2"
+
   }
 
+  private_subnet_tags = {
+    Name = "private"
+
+  }
+   
   tags = {
     Owner       = "user"
     Environment = "dev"
