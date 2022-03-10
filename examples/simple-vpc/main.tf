@@ -26,7 +26,7 @@ module "vpc" {
   enable_ipv6 = true
 
   enable_nat_gateway = true
-  single_nat_gateway = false
+  single_nat_gateway = true
   #reuse_nat_ips       = true                    # <= Skip creation of EIPs for the NAT Gateways
   #external_nat_ip_ids = "${aws_eip.nat.*.id}"
   one_nat_gateway_per_az = false
@@ -37,6 +37,11 @@ module "vpc" {
   }
 
   private_subnet_tags = {
+    Name = "private"
+
+  }
+
+  nat_gateway_tags = {
     Name = "private"
 
   }
