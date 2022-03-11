@@ -1336,13 +1336,3 @@ resource "aws_network_acl_rule" "ops_outbound" {
   cidr_block      = lookup(var.ops_outbound_acl_rules[count.index], "cidr_block", null)
   ipv6_cidr_block = lookup(var.ops_outbound_acl_rules[count.index], "ipv6_cidr_block", null)
 }
-
-resource "aws_route_table_association" "ops" {
-  count = var.create_vpc && length(var.ops_subnets) > 0 ? length(var.ops_subnets) : 0
-
-  subnet_id = element(aws_subnet.ops[*].id, count.index)
-  route_table_id = element(
-    aws_route_table.ops[*].id,
-    var.single_nat_gateway ? 0 : count.index,
-  )
-}
