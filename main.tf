@@ -1059,6 +1059,14 @@ resource "aws_route" "private_ipv6_egress" {
   egress_only_gateway_id      = element(aws_egress_only_internet_gateway.this[*].id, 0)
 }
 
+resource "aws_route" "ops_ipv6_egress" {
+  count = var.create_vpc && var.create_egress_only_igw && var.enable_ipv6 ? length(var.ops_subnets) : 0
+
+  route_table_id              = element(aws_route_table.ops[*].id, count.index)
+  destination_ipv6_cidr_block = "::/0"
+  egress_only_gateway_id      = element(aws_egress_only_internet_gateway.this[*].id, 0)
+}
+
 ################################################################################
 # Route table association
 ################################################################################
@@ -1069,6 +1077,16 @@ resource "aws_route_table_association" "private" {
   subnet_id = element(aws_subnet.private[*].id, count.index)
   route_table_id = element(
     aws_route_table.private[*].id,
+    var.single_nat_gateway ? 0 : count.index,
+  )
+}
+
+resource "aws_route_table_association" "ops" {
+  count = var.create_vpc && length(var.ops_subnets) > 0 ? length(var.ops_subnets) : 0
+
+  subnet_id = element(aws_subnet.ops[*].id, count.index)
+  route_table_id = element(
+    aws_route_table.ops[*].id,
     var.single_nat_gateway ? 0 : count.index,
   )
 }
