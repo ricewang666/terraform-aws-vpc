@@ -43,7 +43,7 @@ module "vpc" {
   }
 
   ops_subnet_tags = {
-    Name = "private"
+    Name = "ops"
 
   }
 
