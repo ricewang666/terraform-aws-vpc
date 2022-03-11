@@ -1240,3 +1240,91 @@ resource "aws_default_vpc" "this" {
     var.default_vpc_tags,
   )
 }
+
+################################################################################
+# ops subnet
+################################################################################
+
+resource "aws_subnet" "ops" {
+  count = var.create_vpc && length(var.ops_subnets) > 0 ? length(var.ops_subnets) : 0
+
+  vpc_id                          = local.vpc_id
+  cidr_block                      = var.ops_subnets[count.index]
+  availability_zone               = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) > 0 ? element(var.azs, count.index) : null
+  availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
+  assign_ipv6_address_on_creation = var.ops_subnet_assign_ipv6_address_on_creation == null ? var.assign_ipv6_address_on_creation : var.ops_subnet_assign_ipv6_address_on_creation
+
+  ipv6_cidr_block = var.enable_ipv6 && length(var.ops_subnet_ipv6_prefixes) > 0 ? cidrsubnet(aws_vpc.this[0].ipv6_cidr_block, 8, var.ops_subnet_ipv6_prefixes[count.index]) : null
+
+  tags = merge(
+    {
+      "Name" = format(
+        "${var.name}-${var.ops_subnet_suffix}-%s",
+        element(var.azs, count.index),
+      )
+    },
+    var.tags,
+    var.ops_subnet_tags,
+  )
+}
+
+################################################################################
+# ops Network ACLs
+################################################################################
+
+resource "aws_network_acl" "ops" {
+  count = var.create_vpc && var.ops_dedicated_network_acl && length(var.ops_subnets) > 0 ? 1 : 0
+
+  vpc_id     = local.vpc_id
+  subnet_ids = aws_subnet.ops[*].id
+
+  tags = merge(
+    { "Name" = "${var.name}-${var.ops_subnet_suffix}" },
+    var.tags,
+    var.ops_acl_tags,
+  )
+}
+
+resource "aws_network_acl_rule" "ops_inbound" {
+  count = var.create_vpc && var.ops_dedicated_network_acl && length(var.ops_subnets) > 0 ? length(var.ops_inbound_acl_rules) : 0
+
+  network_acl_id = aws_network_acl.ops[0].id
+
+  egress          = false
+  rule_number     = var.ops_inbound_acl_rules[count.index]["rule_number"]
+  rule_action     = var.ops_inbound_acl_rules[count.index]["rule_action"]
+  from_port       = lookup(var.ops_inbound_acl_rules[count.index], "from_port", null)
+  to_port         = lookup(var.ops_inbound_acl_rules[count.index], "to_port", null)
+  icmp_code       = lookup(var.ops_inbound_acl_rules[count.index], "icmp_code", null)
+  icmp_type       = lookup(var.ops_inbound_acl_rules[count.index], "icmp_type", null)
+  protocol        = var.ops_inbound_acl_rules[count.index]["protocol"]
+  cidr_block      = lookup(var.ops_inbound_acl_rules[count.index], "cidr_block", null)
+  ipv6_cidr_block = lookup(var.ops_inbound_acl_rules[count.index], "ipv6_cidr_block", null)
+}
+
+resource "aws_network_acl_rule" "ops_outbound" {
+  count = var.create_vpc && var.ops_dedicated_network_acl && length(var.ops_subnets) > 0 ? length(var.ops_outbound_acl_rules) : 0
+
+  network_acl_id = aws_network_acl.ops[0].id
+
+  egress          = true
+  rule_number     = var.ops_outbound_acl_rules[count.index]["rule_number"]
+  rule_action     = var.ops_outbound_acl_rules[count.index]["rule_action"]
+  from_port       = lookup(var.ops_outbound_acl_rules[count.index], "from_port", null)
+  to_port         = lookup(var.ops_outbound_acl_rules[count.index], "to_port", null)
+  icmp_code       = lookup(var.ops_outbound_acl_rules[count.index], "icmp_code", null)
+  icmp_type       = lookup(var.ops_outbound_acl_rules[count.index], "icmp_type", null)
+  protocol        = var.ops_outbound_acl_rules[count.index]["protocol"]
+  cidr_block      = lookup(var.ops_outbound_acl_rules[count.index], "cidr_block", null)
+  ipv6_cidr_block = lookup(var.ops_outbound_acl_rules[count.index], "ipv6_cidr_block", null)
+}
+
+resource "aws_route_table_association" "ops" {
+  count = var.create_vpc && length(var.ops_subnets) > 0 ? length(var.ops_subnets) : 0
+
+  subnet_id = element(aws_subnet.ops[*].id, count.index)
+  route_table_id = element(
+    aws_route_table.ops[*].id,
+    var.single_nat_gateway ? 0 : count.index,
+  )
+}

@@ -544,3 +544,53 @@ output "name" {
   description = "The name of the VPC specified as argument to this module"
   value       = var.name
 }
+
+output "ops_subnets" {
+  description = "List of IDs of ops subnets"
+  value       = aws_subnet.ops[*].id
+}
+
+output "ops_subnet_arns" {
+  description = "List of ARNs of ops subnets"
+  value       = aws_subnet.ops[*].arn
+}
+
+output "ops_subnets_cidr_blocks" {
+  description = "List of cidr_blocks of ops subnets"
+  value       = aws_subnet.ops[*].cidr_block
+}
+
+output "ops_subnets_ipv6_cidr_blocks" {
+  description = "List of IPv6 cidr_blocks of ops subnets in an IPv6 enabled VPC"
+  value       = aws_subnet.ops[*].ipv6_cidr_block
+}
+
+output "ops_route_table_ids" {
+  description = "List of IDs of ops route tables"
+  value       = aws_route_table.ops[*].id
+}
+
+output "ops_nat_gateway_route_ids" {
+  description = "List of IDs of the ops nat gateway route"
+  value       = aws_route.ops_nat_gateway[*].id
+}
+
+output "ops_ipv6_egress_route_ids" {
+  description = "List of IDs of the ipv6 egress route"
+  value       = aws_route.ops_ipv6_egress[*].id
+}
+
+output "ops_route_table_association_ids" {
+  description = "List of IDs of the ops route table association"
+  value       = aws_route_table_association.ops[*].id
+}
+
+output "ops_network_acl_id" {
+  description = "ID of the ops network ACL"
+  value       = try(aws_network_acl.ops[0].id, "")
+}
+
+output "ops_network_acl_arn" {
+  description = "ARN of the ops network ACL"
+  value       = try(aws_network_acl.ops[0].arn, "")
+}

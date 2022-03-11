@@ -1186,3 +1186,83 @@ variable "flow_log_per_hour_partition" {
   type        = bool
   default     = false
 }
+
+variable "ops_subnet_ipv6_prefixes" {
+  description = "Assigns IPv6 ops subnet id based on the Amazon provided /56 prefix base 10 integer (0-256). Must be of equal length to the corresponding IPv4 subnet list"
+  type        = list(string)
+  default     = []
+}
+
+variable "ops_subnet_assign_ipv6_address_on_creation" {
+  description = "Assign IPv6 address on ops subnet, must be disabled to change IPv6 CIDRs. This is the IPv6 equivalent of map_public_ip_on_launch"
+  type        = bool
+  default     = null
+}
+
+variable "ops_subnet_suffix" {
+  description = "Suffix to append to ops subnets name"
+  type        = string
+  default     = "ops"
+}
+
+variable "ops_subnets" {
+  description = "A list of ops subnets inside the VPC"
+  type        = list(string)
+  default     = []
+}
+
+variable "ops_subnet_tags" {
+  description = "Additional tags for the ops subnets"
+  type        = map(string)
+  default     = {}
+}
+
+variable "ops_route_table_tags" {
+  description = "Additional tags for the ops route tables"
+  type        = map(string)
+  default     = {}
+}
+
+variable "ops_acl_tags" {
+  description = "Additional tags for the ops subnets network ACL"
+  type        = map(string)
+  default     = {}
+}
+
+variable "ops_dedicated_network_acl" {
+  description = "Whether to use dedicated network ACL (not default) and custom rules for ops subnets"
+  type        = bool
+  default     = false
+}
+
+variable "ops_inbound_acl_rules" {
+  description = "ops subnets inbound network ACLs"
+  type        = list(map(string))
+
+  default = [
+    {
+      rule_number = 100
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
+    },
+  ]
+}
+
+variable "ops_outbound_acl_rules" {
+  description = "ops subnets outbound network ACLs"
+  type        = list(map(string))
+
+  default = [
+    {
+      rule_number = 100
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
+    },
+  ]
+}
