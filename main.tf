@@ -1358,3 +1358,15 @@ resource "aws_route_table" "ops" {
     var.ops_route_table_tags,
   )
 }
+
+resource "aws_route" "ops_nat_gateway" {
+  count = var.create_vpc && var.enable_nat_gateway ? local.nat_gateway_count : 0
+
+  route_table_id         = element(aws_route_table.ops[*].id, count.index)
+  destination_cidr_block = var.nat_gateway_destination_cidr_block
+  nat_gateway_id         = element(aws_nat_gateway.this[*].id, count.index)
+
+  timeouts {
+    create = "5m"
+  }
+}
