@@ -1336,3 +1336,25 @@ resource "aws_network_acl_rule" "ops_outbound" {
   cidr_block      = lookup(var.ops_outbound_acl_rules[count.index], "cidr_block", null)
   ipv6_cidr_block = lookup(var.ops_outbound_acl_rules[count.index], "ipv6_cidr_block", null)
 }
+
+################################################################################
+# ops routes
+# There are as many routing tables as the number of NAT gateways
+################################################################################
+
+resource "aws_route_table" "ops" {
+  count = var.create_vpc && local.max_subnet_length > 0 ? local.nat_gateway_count : 0
+
+  vpc_id = local.vpc_id
+
+  tags = merge(
+    {
+      "Name" = var.single_nat_gateway ? "${var.name}-${var.ops_subnet_suffix}" : format(
+        "${var.name}-${var.ops_subnet_suffix}-%s",
+        element(var.azs, count.index),
+      )
+    },
+    var.tags,
+    var.ops_route_table_tags,
+  )
+}
