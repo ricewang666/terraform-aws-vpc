@@ -444,8 +444,8 @@ variable "public_subnet_tags" {
 
 variable "private_subnet_tags" {
   description = "Additional tags for the private subnets"
-  type        = map(string)
-  default     = {}
+  type        = list(string)
+  default     = []
 }
 
 variable "outpost_subnet_tags" {

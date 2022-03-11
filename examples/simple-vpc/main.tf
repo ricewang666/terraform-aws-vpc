@@ -37,10 +37,8 @@ module "vpc" {
 
   }
 
-  private_subnet_tags = {
-    Name = "private"
-
-  }
+  private_subnet_tags = ["test1","test2","test3"]
+   
 
   ops_subnet_tags = {
     Name = "ops"
