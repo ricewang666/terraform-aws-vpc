@@ -17,7 +17,7 @@ module "vpc" {
   name = "new-bitcharm"
   cidr = "10.0.0.0/16"
 
-  azs             = ["${local.region}a","${local.region}b"]
+  azs             = ["${local.region}a"]
   
   private_subnets       = ["10.0.21.0/24","10.0.22.0/24","10.0.23.0/24"]
   ops_subnets           = ["10.0.24.0/24","10.0.25.0/24","10.0.26.0/24"]
@@ -27,7 +27,7 @@ module "vpc" {
   enable_ipv6 = true
 
   enable_nat_gateway = true
-  single_nat_gateway = false
+  single_nat_gateway = true
   #reuse_nat_ips       = true                    # <= Skip creation of EIPs for the NAT Gateways
   #external_nat_ip_ids = "${aws_eip.nat.*.id}"
   one_nat_gateway_per_az = false
@@ -37,7 +37,10 @@ module "vpc" {
 
   }
 
-  private_subnet_tags = ["test1","test2","test3"]
+  private_subnet_tags = {
+    Name = "private"
+
+  }
    
 
   ops_subnet_tags = {
