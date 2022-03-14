@@ -17,7 +17,7 @@ module "vpc" {
   name = "new-bitcharm"
   cidr = "10.0.0.0/16"
 
-  azs             = ["${local.region}a"]
+  azs             = ["${local.region}a","${local.region}b"]
   
   private_subnets       = ["10.0.21.0/24","10.0.22.0/24","10.0.23.0/24"]
   ops_subnets           = ["10.0.24.0/24","10.0.25.0/24","10.0.26.0/24"]
